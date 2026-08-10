@@ -8,7 +8,12 @@
      <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
      <link rel="stylesheet" href="{% static 'styles/index.css' %}">
 </head>
-<body>
-    <div class="h-dvh"></div>
+<body class="flex justify-center">
+    <div class="h-dvh w-[80%] bg-red-500 pt-6 flex flex-col items-center">
+        <img src="{% static 'images/logo/logo.png' %}" alt="logo" class="size-16 rounded-xl">
+        <h1 class="text-5xl font-bold pt-6">Campus lost and found</h1>
+        <h2 class="text-base pt-2">Lost something? Found something? Let's reunite it.</h2>
+        <button class="bg-[#4A7CFF] text-white px-4 py-2 rounded mt-6 flex justify-center h-[50px]"><img src="{% static 'images/camera.png' %}" alt="camera logo" class="h-[90%]">I found something</button>
+    </div>
 </body>
 </html>
