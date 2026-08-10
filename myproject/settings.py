@@ -10,9 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
-from pathlib import Path,os
+from pathlib import Path
+import os
+import environ
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+env = environ.Env()
+environ.Env.read_env()
+
+# DEBUG = env.bool('DEBUG', default=False)
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'./
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -23,7 +30,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-59!87x_wdy34x-e#e58sfup9yz!jq!a7%m*+8w_kmd_r-zx=^&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+# DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+# DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG =True
+# DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = ['*']
 
@@ -42,13 +52,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'myproject.urls'
