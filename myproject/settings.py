@@ -20,6 +20,10 @@ env = environ.Env()
 environ.Env.read_env()
 
 # DEBUG = env.bool('DEBUG', default=False)
+# fix railway csrf error
+CSRF_TRUSTED_ORIGINS = [
+    origin for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if origin
+]
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'./
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,7 +41,9 @@ SECRET_KEY = 'django-insecure-59!87x_wdy34x-e#e58sfup9yz!jq!a7%m*+8w_kmd_r-zx=^&
 DEBUG =True
 # DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
+# setting railway for allowed host
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 
 # Application definition
