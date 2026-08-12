@@ -10,6 +10,9 @@ whitenoise = "*"
 django-environ = "*"
 google-genai = "*"
 python-dotenv = "*"
+psycopg2-binary = "*"
+dj-database-url = "*"
+pillow = "*"
 
 [dev-packages]
 
