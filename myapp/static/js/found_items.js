@@ -136,7 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 badgeTitle.classList.remove('hidden');
                 badgeCategory.classList.remove('hidden');
+                document.getElementById('ai_data').value = JSON.stringify(data.data);
                 // testing code
+                console.log('AI Detection Result:', data);
             }
         } catch (error) {
             console.error('Error contacting AI service:', error);
