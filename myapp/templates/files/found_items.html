@@ -8,6 +8,7 @@
     <!-- Tailwind CSS v4 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="{% static 'styles/found_items.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-slate-50 flex justify-center items-center min-h-screen text-slate-800 py-10">
     
@@ -127,5 +128,27 @@
 
     <!-- External JavaScript -->
     <script src="{% static 'js/found_items.js' %}"></script>
+    <!-- imline script -->
+     <script>
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '{{ message }}',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                {% elif message.tags == 'success' %}
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: '{{ message }}',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+     </script>
 </body>
 </html>

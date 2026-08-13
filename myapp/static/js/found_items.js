@@ -158,4 +158,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // }, 1200);
     }
+
+
+
+    const form = document.querySelector('form');
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', () => {
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        submitBtn.innerHTML = `
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Submitting...
+        `;
+    });
+
+    submitBtn.addEventListener('click', () =>{
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerHTML = 'Submit';
+        }, 5000); // Re-enable after 5 seconds
+    });
 });
