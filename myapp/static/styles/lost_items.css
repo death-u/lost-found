@@ -1,0 +1,15 @@
+body{
+    background-color: rgb(199, 199, 199);
+}
+.content{
+    padding: 10px;
+    background-color: aqua;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+.content:hover{
+    opacity: 0.7;
+}
+.content:active{
+    transform: scale(.8);
+}

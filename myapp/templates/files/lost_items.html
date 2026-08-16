@@ -1,11 +1,200 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>lost page</title>
+    <title>Browse Lost Items | Campus Lost & Found</title>
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{% static 'styles/lost_items.css' %}">
 </head>
-<body>
-    this the lost page
+<body class="bg-slate-50 flex justify-center items-start min-h-screen text-slate-800 py-6 px-4">
+
+    <div class="w-full max-w-2xl flex flex-col gap-5">
+        
+        <!-- Header Bar -->
+        <div class="w-full bg-white border border-slate-200/80 shadow-xs h-[70px] flex justify-between items-center px-4 rounded-2xl">
+            <div class="flex items-center gap-3">
+                <img src="{% static 'images/logo/logo.png' %}" alt="Campus Lost & Found Logo" class="h-11 w-11 rounded-xl object-cover bg-slate-100">
+                <h1 class="font-bold text-slate-800 leading-tight text-xs tracking-wide">
+                    CAMPUS <br><span class="text-indigo-600 uppercase">Lost & Found</span>
+                </h1>
+            </div>
+
+            <!-- Search Icon Toggle Button -->
+            <button id="search-toggle-btn" type="button" class="p-2.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition cursor-pointer active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Search Form Drawer -->
+        <form method="GET" action="{% url 'lost_items' %}" id="search-bar-container" class="{% if not search_query %}hidden{% endif %} transition-all duration-300">
+            <div class="relative w-full">
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Search items by keyword or title..." 
+                       class="w-full pl-10 pr-4 py-3 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-xs transition">
+                <svg class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                </svg>
+            </div>
+        </form>
+
+        <!-- Category Bar Section -->
+        <div class="flex flex-col gap-2.5">
+            <h2 class="text-base font-bold text-slate-800 px-1">Category</h2>
+
+            <!-- Scrollable Category List -->
+            <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+                
+                <!-- "All" Category Pill -->
+                <a href="{% url 'lost_items' %}" class="flex flex-col items-center gap-1.5 shrink-0 group">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-xs shadow-xs transition
+                                {% if selected_category == 'all' or not selected_category %}bg-indigo-600 text-white{% else %}bg-white border border-slate-200 text-slate-600 hover:border-indigo-300{% endif %}">
+                        ALL
+                    </div>
+                    <span class="text-[11px] font-semibold {% if selected_category == 'all' %}text-indigo-600{% else %}text-slate-500{% endif %}">All</span>
+                </a>
+
+                <!-- Loop through Database Categories -->
+                {% for cat in categories1 %}
+                    <a href="?category={{ cat|urlencode }}" class="flex flex-col items-center gap-1.5 shrink-0 group">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-sm shadow-xs transition uppercase
+                                    {% if selected_category == cat %}bg-indigo-600 text-white{% else %}bg-white border border-slate-200 text-slate-600 hover:border-indigo-300{% endif %}">
+                            {{ cat|slice:":1" }}
+                        </div>
+                        <span class="text-[11px] font-semibold truncate max-w-[68px] text-center {% if selected_category == cat %}text-indigo-600{% else %}text-slate-500{% endif %}">
+                            {{ cat|title }}
+                        </span>
+                    </a>
+                {% empty %}
+                    <div class="text-xs text-slate-400 italic py-2 px-1">No categories yet.</div>
+                {% endfor %}
+
+            </div>
+        </div>
+
+        <!-- Items Grid (2 Columns on mobile to match design mockup) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mt-1">
+
+            {% for item in items %}
+            <div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col group cursor-pointer"
+                 onclick="openDetailModal('{{ item.title|escapejs }}', '{{ item.category|default:"Uncategorized"|escapejs }}', '{{ item.location|escapejs }}', '{{ item.image.url }}', '{{ item.description|default:"No extra description."|escapejs }}', '{{ item.brand|default:""|escapejs }}', '{{ item.primary_color|default:""|escapejs }}', '{{ item.material|default:""|escapejs }}', '{{ item.date_found|date:"M d, Y" }}', {{ item.secondary_colors|default:"[]" }}, {{ item.distinguishing_features|default:"[]" }})">
+            <!-- <div class="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 flex flex-col group cursor-pointer"
+                 onclick="openDetailModal('{{ item.title|escapejs }}', '{{ item.category|default:"Uncategorized"|escapejs }}', '{{ item.location|escapejs }}', '{{ item.image.url }}', '{{ item.description|default:"No extra description."|escapejs }}', '{{ item.brand|default:""|escapejs }}', '{{ item.primary_color|default:""|escapejs }}', '{{ item.material|default:""|escapejs }}', '{{ item.date_found|date:"M d, Y" }}')"> -->
+                
+                <!-- Image Container with Category Badge -->
+                <div class="relative aspect-square w-full overflow-hidden bg-slate-100">
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    
+                    {% if item.category %}
+                        <span class="absolute bottom-2 left-2 bg-white/90 backdrop-blur-xs text-[10px] font-bold text-slate-700 px-2.5 py-0.5 rounded-full shadow-xs truncate max-w-[80%]">
+                            {{ item.category|title }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Content Footer -->
+                <div class="p-3 flex flex-col justify-between flex-1 gap-1">
+                    <h3 class="font-bold text-xs sm:text-sm text-slate-800 line-clamp-2 leading-snug group-hover:text-indigo-600 transition">
+                        {{ item.title }}
+                    </h3>
+
+                    <div class="flex items-center gap-1 text-[11px] font-medium text-slate-500 mt-1">
+                        <svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="truncate">{{ item.location|default:"Campus" }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% empty %}
+            <!-- EMPTY STATE (Triggers when DB returns 0 matching records) -->
+            <div class="col-span-2 sm:col-span-3 flex flex-col items-center justify-center py-12 px-4 bg-white border border-slate-200/80 rounded-2xl text-center">
+                <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6m0 0l-2.25-2.25M12 16.5l2.25-2.25M3.75 7.5h16.5M6.75 7.5V4.875c0-.621.504-1.125 1.125-1.125h8.25c.621 0 1.125.504 1.125 1.125V7.5"></path>
+                    </svg>
+                </div>
+                <h3 class="text-sm font-bold text-slate-800">Nothing here yet</h3>
+                <p class="text-xs text-slate-500 mt-1 max-w-xs">No items match your filter. Try picking another category or clear your search.</p>
+                
+                {% if selected_category != 'all' or search_query %}
+                    <a href="{% url 'lost_items' %}" class="mt-4 px-4 py-2 bg-indigo-50 text-indigo-600 font-semibold text-xs rounded-xl hover:bg-indigo-100 transition">
+                        Clear Filters
+                    </a>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <script>
+        // Search drawer toggle
+        const searchBtn = document.getElementById('search-toggle-btn');
+        const searchContainer = document.getElementById('search-bar-container');
+
+        searchBtn.addEventListener('click', () => {
+            searchContainer.classList.toggle('hidden');
+        });
+
+        // Detail Modal showcasing model fields
+        function openDetailModal(title, category, location, imageUrl, description, brand, color, material, dateFound, secondaryColors, distinguishingFeatures) {
+            let aiBadges = '';
+            if (brand) aiBadges += `<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[11px] font-semibold">Brand: ${brand}</span>`;
+            if (color) aiBadges += `<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[11px] font-semibold">Color: ${color}</span>`;
+            if (material) aiBadges += `<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[11px] font-semibold">Material: ${material}</span>`;
+
+            // Secondary colors as extra badges
+            if (secondaryColors && secondaryColors.length > 0) {
+                secondaryColors.forEach(c => {
+                    aiBadges += `<span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[11px] font-semibold">+${c}</span>`;
+                });
+            }
+
+            // Distinguishing features as a separate list
+            let featuresHtml = '';
+            if (distinguishingFeatures && distinguishingFeatures.length > 0) {
+                featuresHtml = `
+                    <div class="flex flex-wrap gap-1.5 mt-1">
+                        ${distinguishingFeatures.map(f => `<span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md text-[11px] font-semibold">🔍 ${f}</span>`).join('')}
+                    </div>
+                `;
+            }
+
+            Swal.fire({
+                title: `<span class="text-base font-bold text-slate-800">${title}</span>`,
+                html: `
+                    <div class="flex flex-col gap-3 text-left">
+                        <img src="${imageUrl}" alt="${title}" class="w-full h-48 object-cover rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="bg-indigo-50 text-indigo-700 font-semibold px-2.5 py-1 rounded-full">${category}</span>
+                            <span class="text-slate-500 font-medium">📍 ${location || 'Campus'}</span>
+                        </div>
+                        
+                        ${aiBadges ? `<div class="flex flex-wrap gap-1.5 mt-1">${aiBadges}</div>` : ''}
+                        ${featuresHtml}
+
+                        <p class="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100 mt-1">${description}</p>
+                        <div class="text-[10px] text-slate-400 text-right">Found on ${dateFound}</div>
+                    </div>
+                `,
+                confirmButtonText: 'Claim Item',
+                confirmButtonColor: '#4f46e5',
+                showCancelButton: true,
+                cancelButtonText: 'Close',
+                customClass: {
+                    popup: 'rounded-2xl p-4',
+                    confirmButton: 'rounded-xl text-xs font-semibold py-2.5 px-4',
+                    cancelButton: 'rounded-xl text-xs font-semibold py-2.5 px-4'
+                }
+            });
+        }
+    </script>
 </body>
 </html>

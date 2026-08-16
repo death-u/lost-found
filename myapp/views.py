@@ -54,7 +54,30 @@ def found(request):
 
 # basic function to render the index.html template
 def lost(request):
-    return render(request,'files/lost_items.html');
+    selected_category = request.GET.get('category', 'all')
+    search_query = request.GET.get('q', '').strip()
+
+    # Get distinct categories from database
+    categories = FoundItem.objects.exclude(category='').values_list('category', flat=True).distinct()
+
+    # Base Queryset ordered by newest first
+    items = FoundItem.objects.all().order_by('-date_found')
+
+    # Apply category filter
+    if selected_category and selected_category != 'all':
+        items = items.filter(category__iexact=selected_category)
+
+    # Apply search query filter
+    if search_query:
+        items = items.filter(title__icontains=search_query)
+
+    context = {
+        "items": items,
+        "categories1": categories,
+        "selected_category": selected_category,
+        "search_query": search_query,
+    }
+    return render(request,'files/lost_items.html', context);
 
 @require_POST
 def detect(request):
